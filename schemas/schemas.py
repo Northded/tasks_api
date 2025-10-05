@@ -13,3 +13,7 @@ class TaskAddDTO(BaseModel):
 
 class TaskDTO(TaskAddDTO):
       id: int
+
+
+class TaskUpdateDTO(TaskAddDTO):
+     ...
