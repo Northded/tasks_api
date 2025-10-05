@@ -1,9 +1,15 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import String
-
+from enum import Enum
 
 class Base(DeclarativeBase):
     ...
+
+
+class Status(Enum):
+    DONE = "DONE"
+    PROGRESS = "IN_PROGRESS"
+    BLOCKED = "BLOCKED"
 
 
 class TasksOrm(Base):
@@ -17,3 +23,4 @@ class TasksOrm(Base):
         nullable=False, 
         )
     description: Mapped[str | None] 
+    status: Mapped[Status]
