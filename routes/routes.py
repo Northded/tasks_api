@@ -33,4 +33,13 @@ async def update_task(
 ):
     tasks = await Repository.update_one(data=data, id=id, session=session)
     return {"updated": tasks}
+
+
+@router.delete("")
+async def del_task(
+    id: int,
+    session: SessionDep,
+):
+    await Repository.delete_task(id=id, session=session)
+    return {"ok": True}
  

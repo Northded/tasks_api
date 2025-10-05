@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import select, update, delete
 from sqlalchemy.orm import aliased
 from models.models import TasksOrm
 from database import session_factory
@@ -41,6 +41,15 @@ class Repository():
         await session.commit()
         row = result.fetchone()
         return TaskDTO.model_validate(row[0], from_attributes=True)
+    
+    @classmethod
+    async def delete_task(cls, id: int, session: SessionDep):
+        query = (
+            delete(TasksOrm)
+            .where(TasksOrm.id == id)
+        )
+        await session.execute(query)
+        await session.commit()
 
 
 
