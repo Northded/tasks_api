@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from database import create_db
 from contextlib import asynccontextmanager
 from routes.routes import router as tasks_router
