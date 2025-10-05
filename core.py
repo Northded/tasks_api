@@ -1,8 +1,10 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import aliased
 from models.models import TasksOrm
 from database import session_factory
-from schemas.schemas import TaskAddDTO, TaskDTO 
+from schemas.schemas import TaskAddDTO, TaskDTO, TaskUpdateDTO 
+from deps import SessionDep
+
 
 
 class Repository():
@@ -26,5 +28,20 @@ class Repository():
             task_models = result.scalars().all()
             task_schemas = [TaskDTO.model_validate(col, from_attributes=True) for col in task_models]
             return task_schemas
+        
+    @classmethod 
+    async def update_one(cls, id: int, session: SessionDep, data: TaskUpdateDTO) -> TaskDTO:
+        query = (
+            update(TasksOrm)
+            .where(TasksOrm.id == id)
+            .values(**data.model_dump())
+            .returning(TasksOrm)
+        )
+        result = await session.execute(query)
+        await session.commit()
+        row = result.fetchone()
+        return TaskDTO.model_validate(row[0], from_attributes=True)
+
+
 
     
