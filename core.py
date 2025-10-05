@@ -1,6 +1,6 @@
 from sqlalchemy import select, update, delete
 from sqlalchemy.orm import aliased
-from models.models import TasksOrm
+from models.models import TasksOrm, Status
 from database import session_factory
 from schemas.schemas import TaskAddDTO, TaskDTO, TaskUpdateDTO 
 from deps import SessionDep
@@ -50,6 +50,23 @@ class Repository():
         )
         await session.execute(query)
         await session.commit()
+    
+    @classmethod
+    async def find_by_status_filter(cls, status: str | None, session: SessionDep):
+        query = (
+            select(TasksOrm)
+        )
+        if status:
+            query = (
+                query
+                .where(TasksOrm.status == status)
+            )
+
+        result = await session.execute(query)
+        tasks = result.scalars().all()
+        return [TaskDTO.model_validate(task, from_attributes=True) for task in tasks]
+
+    
 
 
 

@@ -23,4 +23,4 @@ class TasksOrm(Base):
         nullable=False, 
         )
     description: Mapped[str | None] 
-    status: Mapped[Status]
+    status: Mapped[Status | None] = mapped_column(nullable=True)

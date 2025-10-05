@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Annotated, Literal
+from models.models import Status
 
 
 class TaskAddDTO(BaseModel):
@@ -9,7 +10,7 @@ class TaskAddDTO(BaseModel):
     
     name: Annotated[str, Field()]
     description: Annotated[str | None, Field(default=None)]
-    status: Literal["DONE", "IN_PROGRESS", "BLOCKED"]
+    status: Annotated[Status, Field()]
 
 
 class TaskDTO(TaskAddDTO):
