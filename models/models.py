@@ -8,7 +8,7 @@ class Base(DeclarativeBase):
 
 class Status(Enum):
     DONE = "DONE"
-    PROGRESS = "IN_PROGRESS"
+    PROGRESS = "PROGRESS"
     BLOCKED = "BLOCKED"
 
 
