@@ -11,6 +11,8 @@ class TaskAddDTO(BaseModel):
     name: Annotated[str, Field()]
     description: Annotated[str | None, Field(default=None)]
     status: Annotated[Status, Field()]
+    priority: Annotated[int, Field(gt=0, le=3)]
+
 
 
 class TaskDTO(TaskAddDTO):
