@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from typing import Annotated
+from typing import Annotated, Literal
 from schemas.schemas import TaskAddDTO, TaskDTO, TaskUpdateDTO
 from core import Repository
 from deps import SessionDep
@@ -21,10 +21,15 @@ async def add_task(
 
 
 @router.get("")
-async def get_tasks():
-    tasks = await Repository.find_all()
+async def get_tasks(
+    session: SessionDep,
+    priority: Literal["asc", "desc"] = None
+):
+    if not priority:
+        tasks = await Repository.find_all()
+        return {"tasks": tasks} 
+    tasks = await Repository.find_by_priority_sorted(session=session, priority=priority)
     return {"tasks": tasks} 
-
 
 @router.put("")
 async def update_task(

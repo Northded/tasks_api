@@ -1,4 +1,4 @@
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, asc, desc
 from sqlalchemy.orm import aliased
 from models.models import TasksOrm, Status
 from database import session_factory
@@ -60,6 +60,26 @@ class Repository():
             query = (
                 query
                 .where(TasksOrm.status == status)
+            )
+
+        result = await session.execute(query)
+        tasks = result.scalars().all()
+        return [TaskDTO.model_validate(task, from_attributes=True) for task in tasks]
+    
+    @classmethod
+    async def find_by_priority_sorted(cls, session: SessionDep, priority: str = 'asc') -> list[TaskDTO]:
+        query = (
+            select(TasksOrm)
+        )
+        if priority == "asc":
+            query = (
+                query
+                .order_by(asc(TasksOrm.priority))
+            )
+        else:
+            query = (
+                query
+                .order_by(desc(TasksOrm.priority))
             )
 
         result = await session.execute(query)
