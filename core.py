@@ -1,4 +1,4 @@
-from sqlalchemy import select, update, delete, asc, desc
+from sqlalchemy import select, update, delete, asc, desc, and_, or_
 from sqlalchemy.orm import aliased
 from models.models import TasksOrm, Status
 from database import session_factory
@@ -9,7 +9,10 @@ from deps import SessionDep
 
 class Repository():
     @classmethod
-    async def add_one(cls, data: TaskAddDTO) -> int:
+    async def add_one(
+        cls, 
+        data: TaskAddDTO
+    ) -> int:
         async with session_factory() as session:
             task_dict = data.model_dump()
             task = TasksOrm(**task_dict)
@@ -17,20 +20,14 @@ class Repository():
             await session.flush()
             await session.commit()
             return task.id
-
-    @classmethod
-    async def find_all(cls) -> list[TaskDTO]:
-        async with session_factory() as session:
-            query = (
-                select(TasksOrm)
-            )
-            result = await session.execute(query)
-            task_models = result.scalars().all()
-            task_schemas = [TaskDTO.model_validate(col, from_attributes=True) for col in task_models]
-            return task_schemas
         
     @classmethod 
-    async def update_one(cls, id: int, session: SessionDep, data: TaskUpdateDTO) -> TaskDTO:
+    async def update_one(
+        cls, 
+        id: int, 
+        session: SessionDep, 
+        data: TaskUpdateDTO
+    ) -> TaskDTO:
         query = (
             update(TasksOrm)
             .where(TasksOrm.id == id)
@@ -43,7 +40,11 @@ class Repository():
         return TaskDTO.model_validate(row[0], from_attributes=True)
     
     @classmethod
-    async def delete_task(cls, id: int, session: SessionDep):
+    async def delete_task(
+        cls, 
+        id: int, 
+        session: SessionDep
+    ):
         query = (
             delete(TasksOrm)
             .where(TasksOrm.id == id)
@@ -52,22 +53,11 @@ class Repository():
         await session.commit()
     
     @classmethod
-    async def find_by_status_filter(cls, status: str | None, session: SessionDep):
-        query = (
-            select(TasksOrm)
-        )
-        if status:
-            query = (
-                query
-                .where(TasksOrm.status == status)
-            )
-
-        result = await session.execute(query)
-        tasks = result.scalars().all()
-        return [TaskDTO.model_validate(task, from_attributes=True) for task in tasks]
-    
-    @classmethod
-    async def find_by_priority_sorted(cls, session: SessionDep, priority: str = 'asc') -> list[TaskDTO]:
+    async def find_by_priority_sorted(
+        cls, 
+        session: SessionDep, 
+        priority: str = 'asc'
+    ) -> list[TaskDTO]:
         query = (
             select(TasksOrm)
         )
@@ -85,6 +75,49 @@ class Repository():
         result = await session.execute(query)
         tasks = result.scalars().all()
         return [TaskDTO.model_validate(task, from_attributes=True) for task in tasks]
+    
+    @classmethod
+    async def find_tasks_with_filters(
+        cls,
+        session: SessionDep,
+        keyword: str | None = None,
+        status: str | None = None,
+        priority: int | None = None,
+    ):
+        query = (
+            select(TasksOrm)
+        )
+
+        conditions = []
+
+        if keyword:
+
+            keyword_like = f"%{keyword}%"
+
+            conditions.append(
+                or_(
+                    TasksOrm.description.ilike(keyword_like),
+                    TasksOrm.name.ilike(keyword_like)
+                )
+            )
+        if status:
+            conditions.append(
+                TasksOrm.status == status
+            )
+        if priority:
+            conditions.append(
+                TasksOrm.priority == priority
+            )
+        if conditions:
+            query = (
+                query.where(and_(*conditions))
+            )
+        result = await session.execute(query)
+        tasks = result.scalars().all()
+        return [TaskDTO.model_validate(task, from_attributes=True) for task in tasks]
+
+
+
 
     
 

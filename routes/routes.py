@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
-from typing import Annotated, Literal
-from schemas.schemas import TaskAddDTO, TaskDTO, TaskUpdateDTO
+from typing import Literal
+from schemas.schemas import TaskAddDTO, TaskUpdateDTO
 from core import Repository
 from deps import SessionDep
 from models.models import Status
@@ -31,7 +31,7 @@ async def get_tasks(
     tasks = await Repository.find_by_priority_sorted(session=session, priority=priority)
     return {"tasks": tasks} 
 
-@router.put("")
+@router.put("/{id}")
 async def update_task(
     id: int,
     data: TaskUpdateDTO,
@@ -53,7 +53,14 @@ async def del_task(
 @router.get("/filtred/")
 async def get_filtred_by_status_tasks(
     session: SessionDep,
-    status: Status | None = None, 
-    ):
-    tasks = await Repository.find_by_status_filter(status=status, session=session)
+    status: Status | None = None,
+    keyword: str | None = None,
+    priority: int | None = None,
+):
+    tasks = await Repository.find_tasks_with_filters(
+        status=status, 
+        session=session, 
+        priority=priority,
+        keyword=keyword,
+    )
     return {"tasks": tasks}
