@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query
 from database import create_db
 from contextlib import asynccontextmanager
 from routes.routes import router as tasks_router
+from demo_auth.views import router as auth_router
 
 
 @asynccontextmanager
@@ -14,6 +15,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(router=tasks_router)
+app.include_router(router=auth_router)
 
 
 if __name__ == "__main__":

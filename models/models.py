@@ -1,6 +1,11 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, CheckConstraint
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import String, CheckConstraint, ForeignKey
+from passlib.context import CryptContext
 from enum import Enum
+
+
+pwd_context = CryptContext(schemes="bcrypt", deprecated="auto")
+
 
 class Base(DeclarativeBase):
     ...
@@ -10,6 +15,7 @@ class Status(Enum):
     DONE = "DONE"
     PROGRESS = "PROGRESS"
     BLOCKED = "BLOCKED"
+
 
 class TasksOrm(Base):
 
@@ -28,6 +34,12 @@ class TasksOrm(Base):
     priority: Mapped[int] = mapped_column(
         nullable=True
     )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE")
+    )
+    user: Mapped["UserOrm"] = relationship(
+        back_populates="tasks"
+    )
 
     __table_args__ = (
         CheckConstraint(
@@ -35,3 +47,24 @@ class TasksOrm(Base):
             name='priority_range',
             ),
     )
+
+
+class UserOrm(Base):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(
+        primary_key=True
+    )
+    username: Mapped[str] = mapped_column(
+        String(20)
+    )
+    hashed_password: Mapped[str]
+    tasks: Mapped[list["TasksOrm"]] = relationship(
+        back_populates="user"
+    )
+
+    async def verify_password(self, password: str):
+        return pwd_context.verify(password, self.hashed_password)
+
+    @classmethod
+    async def get_password_hash(cls, password: str):
+        return pwd_context.hash(password) 

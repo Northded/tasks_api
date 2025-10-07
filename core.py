@@ -1,6 +1,6 @@
 from sqlalchemy import select, update, delete, asc, desc, and_, or_
 from sqlalchemy.orm import aliased
-from models.models import TasksOrm, Status
+from models.models import TasksOrm
 from database import session_factory
 from schemas.schemas import TaskAddDTO, TaskDTO, TaskUpdateDTO 
 from deps import SessionDep
