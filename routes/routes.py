@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from typing import Literal
-from schemas.schemas import TaskAddDTO, TaskUpdateDTO
+from schemas.schemas import TaskAddDTO, TaskUpdateDTO, UsersAddDTO
 from core import Repository
 from deps import SessionDep
 from models.models import Status
@@ -64,3 +64,15 @@ async def get_filtred_by_status_tasks(
         keyword=keyword,
     )
     return {"tasks": tasks}
+
+@router.post("/registration/")
+async def add_new_user(
+    session: SessionDep,
+    data: UsersAddDTO,
+):
+    user = await Repository.register_user(
+        session=session,
+        username=data.username,
+        password=data.password,
+    )
+    return {"ok": "User added"}

@@ -21,3 +21,16 @@ class TaskDTO(TaskAddDTO):
 
 class TaskUpdateDTO(TaskAddDTO):
      ...
+
+
+class UsersAddDTO(BaseModel):
+    model_config = {
+        "extra": "forbid"
+        }
+    username: Annotated[str, Field()]
+    password: Annotated[str | None, Field()]
+    
+
+class UsersDTO(UsersAddDTO):
+    id: int
+    tasks: Annotated[list["TaskDTO"], Field()]

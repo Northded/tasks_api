@@ -1,7 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from config import settings
-from models.models import Base, TasksOrm
+from models.models import Base, TasksOrm, UsersOrm
 
 
 metadata_obj = Base.metadata

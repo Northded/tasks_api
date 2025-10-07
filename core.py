@@ -1,6 +1,6 @@
 from sqlalchemy import select, update, delete, asc, desc, and_, or_
 from sqlalchemy.orm import aliased
-from models.models import TasksOrm
+from models.models import TasksOrm, UsersOrm
 from database import session_factory
 from schemas.schemas import TaskAddDTO, TaskDTO, TaskUpdateDTO 
 from deps import SessionDep
@@ -115,6 +115,29 @@ class Repository():
         result = await session.execute(query)
         tasks = result.scalars().all()
         return [TaskDTO.model_validate(task, from_attributes=True) for task in tasks]
+    
+    @classmethod
+    async def register_user(
+        cls, 
+        session: SessionDep,
+        username: str,     
+        password: str,     
+    ):
+        query = (
+            select(UsersOrm)
+            .where(UsersOrm.username == username)
+        )
+        result = await session.execute(query)
+        existing_user = result.scalar_one_or_none()
+        if existing_user:
+            raise ValueError(f"User with username - {username} is existed")
+        hashed_pass = UsersOrm.get_password_hash(password=password)
+        user = UsersOrm(username=username, hashed_password=hashed_pass)
+        session.add(user)
+        await session.flush()
+        await session.refresh(user)
+        await session.commit()
+        
 
 
 

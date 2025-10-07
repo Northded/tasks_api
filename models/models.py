@@ -37,7 +37,7 @@ class TasksOrm(Base):
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE")
     )
-    user: Mapped["UserOrm"] = relationship(
+    user: Mapped["UsersOrm"] = relationship(
         back_populates="tasks"
     )
 
@@ -49,7 +49,7 @@ class TasksOrm(Base):
     )
 
 
-class UserOrm(Base):
+class UsersOrm(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(
         primary_key=True
@@ -61,10 +61,12 @@ class UserOrm(Base):
     tasks: Mapped[list["TasksOrm"]] = relationship(
         back_populates="user"
     )
+ 
 
     async def verify_password(self, password: str):
         return pwd_context.verify(password, self.hashed_password)
 
     @classmethod
-    async def get_password_hash(cls, password: str):
-        return pwd_context.hash(password) 
+    def get_password_hash(cls, password: str):
+        truncated_password = password[:72]
+        return pwd_context.hash(truncated_password) 
