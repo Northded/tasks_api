@@ -14,7 +14,17 @@ class Repository():
         data: TaskAddDTO
     ) -> int:
         async with session_factory() as session:
-            task_dict = data.model_dump()
+            query = (
+                select(UsersOrm)
+                .where(UsersOrm.username == data.username)
+            )
+            res = await session.execute(query)
+            user = res.scalars().first()
+            user_id = user.id
+            task_dict = data.model_dump(
+                exclude={"username"},
+            )
+            task_dict["user_id"] = user_id
             task = TasksOrm(**task_dict)
             session.add(task)
             await session.flush()
