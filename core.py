@@ -72,14 +72,17 @@ class Repository():
             .options(selectinload(TasksOrm.user))
         )
         if priority == "asc":
-            query = query.order_by(asc(TasksOrm.priority))
+            query = (
+                query.order_by(asc(TasksOrm.priority))
+            )
         else:
-            query = query.order_by(desc(TasksOrm.priority))
+            query = (
+                query.order_by(desc(TasksOrm.priority))
+            )
 
         result = await session.execute(query)
         tasks = result.scalars().all()
         
-        # Вручную создаем DTO чтобы избежать проблем с валидацией
         task_dtos = []
         for task in tasks:
             user_dto = UserDTO(id=task.user.id, username=task.user.username)
