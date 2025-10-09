@@ -1,10 +1,9 @@
 from sqlalchemy import select, update, delete, asc, desc, and_, or_
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, selectinload
 from models.models import TasksOrm, UsersOrm
 from database import session_factory
-from schemas.schemas import TaskAddDTO, TaskDTO, TaskUpdateDTO 
+from schemas.schemas import TaskAddDTO, TaskDTO, TaskUpdateDTO, UserDTO
 from deps import SessionDep
-
 
 
 class Repository():
@@ -70,21 +69,31 @@ class Repository():
     ) -> list[TaskDTO]:
         query = (
             select(TasksOrm)
+            .options(selectinload(TasksOrm.user))
         )
         if priority == "asc":
-            query = (
-                query
-                .order_by(asc(TasksOrm.priority))
-            )
+            query = query.order_by(asc(TasksOrm.priority))
         else:
-            query = (
-                query
-                .order_by(desc(TasksOrm.priority))
-            )
+            query = query.order_by(desc(TasksOrm.priority))
 
         result = await session.execute(query)
         tasks = result.scalars().all()
-        return [TaskDTO.model_validate(task, from_attributes=True) for task in tasks]
+        
+        # Вручную создаем DTO чтобы избежать проблем с валидацией
+        task_dtos = []
+        for task in tasks:
+            user_dto = UserDTO(id=task.user.id, username=task.user.username)
+            task_dto = TaskDTO(
+                id=task.id,
+                name=task.name,
+                description=task.description,
+                status=task.status,
+                priority=task.priority,
+                user=user_dto
+            )
+            task_dtos.append(task_dto)
+        
+        return task_dtos
     
     @classmethod
     async def find_tasks_with_filters(
@@ -124,7 +133,19 @@ class Repository():
             )
         result = await session.execute(query)
         tasks = result.scalars().all()
-        return [TaskDTO.model_validate(task, from_attributes=True) for task in tasks]
+        task_dtos = []
+        for task in tasks:
+            user_dto = UserDTO(id=task.user.id, username=task.user.username)
+            task_dto = TaskDTO(
+                id=task.id,
+                name=task.name,
+                description=task.description,
+                status=task.status,
+                priority=task.priority,
+                user=user_dto
+            )
+            task_dtos.append(task_dto)
+        return task_dtos
     
     @classmethod
     async def register_user(
