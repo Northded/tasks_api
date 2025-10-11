@@ -1,9 +1,15 @@
+from typing import Annotated
 from sqlalchemy import select, update, delete, asc, desc, and_, or_
 from sqlalchemy.orm import aliased, selectinload
 from models.models import TasksOrm, UsersOrm
 from database import session_factory
 from schemas.schemas import TaskAddDTO, TaskDTO, TaskUpdateDTO, UserDTO
 from deps import SessionDep
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+
+
+security = HTTPBasic()
 
 
 class Repository():
@@ -171,13 +177,20 @@ class Repository():
         await session.flush()
         await session.refresh(user)
         await session.commit()
-        
 
-
-
-
-    
-
-
-
-    
+    @classmethod
+    async def get_username(
+        cls, 
+        username: str, 
+        session: SessionDep
+    ):
+        query = (
+            select(UsersOrm.username, UsersOrm.hashed_password)
+            .where(UsersOrm.username == username)
+        )
+        user = await session.execute(query)
+        result = user.one_or_none()
+        if not result:
+            raise ValueError(f"User {username} is not existed")
+        return result
+        k

@@ -62,7 +62,6 @@ class UsersOrm(Base):
         back_populates="user"
     )
  
-
     async def verify_password(self, password: str):
         return pwd_context.verify(password, self.hashed_password)
 
