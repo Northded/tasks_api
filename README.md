@@ -10,7 +10,7 @@
 
 Для изоляции окружения в проекте рекомендуется использовать виртуальное окружение:
 
-python -m venv ve
+`python -m venv ve`
 
 ---
 
@@ -18,11 +18,11 @@ python -m venv ve
 
 - На Windows:
 
-ve\Scripts\activate
+`ve\Scripts\activate`
 
 - На macOS/Linux:
 
-source ve/bin/activate
+`source ve/bin/activate`
 
 ---
 
@@ -30,7 +30,7 @@ source ve/bin/activate
 
 После активации виртуального окружения установи все необходимые зависимости:
 
-pip install -r requirements.txt
+`pip install -r requirements.txt`
 
 ---
 
@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 Запусти приложение FastAPI с помощью uvicorn для локальной разработки:
 
-uvicorn main:app --reload
+`uvicorn main:app --reload`
 
 После запуска приложение будет доступно по адресу:  
 [http://127.0.0.1:8000](http://127.0.0.1:8000)
