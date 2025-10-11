@@ -16,7 +16,6 @@ security = HTTPBasic()
 SecurityDep = Annotated[HTTPBasicCredentials, Depends(security)]
 
 
-@router.get("/basic_auth/")
 async def basic_auth_credentials(
     credentials: SecurityDep,
     session: SessionDep
@@ -42,7 +41,4 @@ async def basic_auth_credentials(
             detail="Incorrect password or username",
             headers={"WWW-Authenticate": "Basic"}
         )
-    return {
-        "username": correct_username,
-        "status": "Authorized"
-    }
+    return correct_username

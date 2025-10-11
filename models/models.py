@@ -69,3 +69,4 @@ class UsersOrm(Base):
     def get_password_hash(cls, password: str):
         truncated_password = password[:72]
         return pwd_context.hash(truncated_password) 
+    
